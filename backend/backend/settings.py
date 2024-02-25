@@ -127,6 +127,7 @@ DJOSER ={
         'user_create': 'api.serializers.CustomUserCreateSerializer',
         'token': 'djoser.serializers.TokenSerializer',
         'token_create': 'djoser.serializers.TokenCreateSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
     }
 }
 CSRF_COOKIE_SECURE = False
