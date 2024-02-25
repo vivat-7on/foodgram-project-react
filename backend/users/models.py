@@ -7,11 +7,12 @@ from django.db import models
 
 class CustomUserManager(UserManager):
 
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('Введите адрес электронной почты!')
+    def create_user(self, email, username=None, first_name=None,
+                    last_name=None, password=None, **extra_fields):
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, username=username,
+                          first_name=first_name, last_name=last_name,
+                          **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -50,12 +51,12 @@ class CustomUser(AbstractUser):
 class Subscribe(models.Model):
     subscriber = models.ForeignKey(
         CustomUser,
-        related_name='подписчик',
+        related_name='subscriptions',
         on_delete=models.CASCADE
     )
     subscribed_to = models.ForeignKey(
         CustomUser,
-        related_name='подписка',
+        related_name='subscribers',
         on_delete=models.CASCADE
     )
 
