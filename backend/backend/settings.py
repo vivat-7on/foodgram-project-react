@@ -122,22 +122,22 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2
+    'PAGE_SIZE': 1
 
 }
 
 DJOSER ={
     'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
-        'user': 'api.serializers.CustomUserSerializer',
-        'user_create': 'api.serializers.CustomUserCreateSerializer',
+        'user': 'users.serializers.CustomUserSerializer',
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
         'token': 'djoser.serializers.TokenSerializer',
         'token_create': 'djoser.serializers.TokenCreateSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer',
+        'current_user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],
-        'user': ['rest_framework.permissions.AllowAny'],
+        'user': ['djoser.permissions.CurrentUserOrAdmin'],
     }
 }
 CSRF_COOKIE_SECURE = False
