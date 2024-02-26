@@ -39,7 +39,8 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    pass
+    name = models.CharField(max_length=200)
+    measurement_unit = models.CharField(max_length=200)
 
 
 class Recipe(models.Model):
