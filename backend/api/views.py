@@ -1,25 +1,32 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from . import serializers
-from recipes.models import Tag, Ingredient
+from .serializers import (
+    TagSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+)
+from recipes.models import Tag, Ingredient, Recipe
 
 
-class TagViewSet(viewsets.ModelViewSet):
+class TagIngredientViewSetMixin(viewsets.ModelViewSet):
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class TagViewSet(TagIngredientViewSetMixin):
     queryset = Tag.objects.all()
-    serializer_class = serializers.TagSerializer
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    serializer_class = TagSerializer
 
 
-class IngredientViewSet(viewsets.ModelViewSet):
+class IngredientViewSet(TagIngredientViewSetMixin):
     queryset = Ingredient.objects.all()
-    serializer_class = serializers.IngredientSerializer
+    serializer_class = IngredientSerializer
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
