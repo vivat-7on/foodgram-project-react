@@ -1,8 +1,12 @@
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
-    RegexValidator)
+    RegexValidator,
+    MinValueValidator,
+)
 from django.db import models
+
+from users.models import CustomUser
 
 
 class Tag(models.Model):
@@ -20,11 +24,10 @@ class Tag(models.Model):
                 message='Enter a valid color in HEX format.',
                 code='invalid_color_format',
             )
-    ])
+        ])
     slug = models.SlugField(
         max_length=200,
         unique=True,
-        null=True,
         blank=True,
         validators=[
             RegexValidator(
@@ -42,6 +45,34 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 class Recipe(models.Model):
-    pass
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    image = models.ImageField(null=True, upload_to='media/')
+    text = models.TextField()
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='RecipeIngredient',
+    )
+    tags = models.ManyToManyField(Tag)
+    cooking_time = models.IntegerField(
+        validators=[MinValueValidator(1)]
+    )
+    is_favorited = models.BooleanField(default=False)
+    is_in_shopping_cart = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.recipe}, {self.ingredient}'
