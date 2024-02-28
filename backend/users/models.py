@@ -37,6 +37,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     email = models.EmailField(
+        max_length=254,
         unique=True,
     )
     is_subscribed = models.BooleanField(

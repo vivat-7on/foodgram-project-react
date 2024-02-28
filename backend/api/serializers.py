@@ -1,8 +1,21 @@
-from rest_framework import serializers
+import base64
 
-from recipes.models import Tag, Ingredient, Recipe
+from rest_framework import serializers
+from django.core.files.base import ContentFile
+
+from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 
 from users.serializers import CustomUserSerializer
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+
+        return super().to_internal_value(data)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -17,10 +30,24 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'measurement_unit']
 
 
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='ingredient.id')
+    name = serializers.CharField(source='ingredient.name')
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit'
+    )
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ['id', 'name', 'measurement_unit', 'amount']
+
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = IngredientSerializer(many=True, read_only=True)
+    ingredients = RecipeIngredientSerializer(source='recipeingredient_set', many=True, read_only=True)
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Recipe
@@ -36,3 +63,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         ]
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['author'] = user
+        return super().create(validated_data)

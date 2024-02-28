@@ -28,13 +28,12 @@ class Tag(models.Model):
     slug = models.SlugField(
         max_length=200,
         unique=True,
-        blank=True,
         validators=[
             RegexValidator(
                 regex=r'^[-a-zA-Z0-9_]+$',
                 message='Enter a valid slug in the format.',
                 code='invalid_slug_format',
-            )]
+            )],
     )
 
     def __str__(self):
@@ -52,7 +51,12 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    image = models.ImageField(null=True, upload_to='media/', default=None)
+    image = models.ImageField(
+        null=True,
+        upload_to='media/',
+        default=None,
+        blank=True
+    )
     text = models.TextField()
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -72,7 +76,7 @@ class Recipe(models.Model):
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.IntegerField()
 
     def __str__(self):
         return f'{self.recipe}, {self.ingredient}'
