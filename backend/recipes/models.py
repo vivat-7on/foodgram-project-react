@@ -66,8 +66,6 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(
         validators=[MinValueValidator(1)]
     )
-    is_favorited = models.BooleanField(default=False)
-    is_in_shopping_cart = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -80,3 +78,25 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.recipe}, {self.ingredient}'
+
+
+class FavoriteRecipe(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('recipe', 'user')
+
+    def __str__(self):
+        return f'{self.recipe} favorite for {self.user.username}'
+
+
+class ShoppingCard(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('recipe', 'user')
+
+    def __str__(self):
+        return f'{self.recipe} is {self.user.username}\'s card'
