@@ -10,6 +10,7 @@ from recipes.models import (
     RecipeIngredient,
     FavoriteRecipe,
     ShoppingCard,
+    TagRecipe,
 )
 
 from users.serializers import CustomUserSerializer
@@ -37,10 +38,20 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source='ingredient.id')
-    name = serializers.CharField(source='ingredient.name')
+    id = serializers.IntegerField(
+        source='ingredient.id',
+        read_only=True
+    )
+    name = serializers.CharField(
+        source='ingredient.name',
+        read_only=True
+    )
     measurement_unit = serializers.CharField(
-        source='ingredient.measurement_unit'
+        source='ingredient.measurement_unit',
+        read_only=True
+    )
+    amount = serializers.IntegerField(
+        read_only=True
     )
 
     class Meta:
@@ -49,13 +60,15 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = RecipeIngredientSerializer(source='recipeingredient_set',
-                                             many=True, read_only=True)
-    image = Base64ImageField(required=False, allow_null=True)
+    ingredients = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField(
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Recipe
@@ -72,10 +85,29 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         ]
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if request.method == 'POST':
+            data['author'] = CustomUserSerializer(instance.author).data
+        return data
+
     def create(self, validated_data):
-        user = self.context['request'].user
-        validated_data['author'] = user
-        return super().create(validated_data)
+        request = self.context.get('request')
+        validated_data['author'] = request.user
+        instance = super().create(validated_data)
+        return instance
+
+    def get_tags(self, obj):
+        tag_recipes = TagRecipe.objects.filter(recipe=obj)
+        tags = [tag_recipe.tag for tag_recipe in tag_recipes]
+        return TagSerializer(tags, many=True).data
+
+    def get_ingredients(self, obj):
+        ingredients_recipes = RecipeIngredient.objects.filter(recipe=obj)
+        ingredient_data = RecipeIngredientSerializer(ingredients_recipes,
+                                                     many=True).data
+        return ingredient_data
 
     def get_is_favorited(self, obj):
         return self._is_related_to_user(obj, FavoriteRecipe)
