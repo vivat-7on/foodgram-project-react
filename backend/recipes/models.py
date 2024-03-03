@@ -58,7 +58,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ingredient'
         verbose_name_plural = 'Ingredients'
-        ordering = ('name', )
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -82,6 +82,11 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(
         validators=[MinValueValidator(1)],
         verbose_name='Cooking Time'
+    )
+    tags = models.ManyToManyField(Tag)
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='RecipeIngredient'
     )
 
     class Meta:
@@ -112,29 +117,6 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.recipe}, {self.ingredient}'
-
-
-class TagRecipe(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Recipe',
-        related_name='tags'
-    )
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        verbose_name='Tag',
-        related_name='tagged_recipes'
-    )
-
-    class Meta:
-        verbose_name = 'Tag Recipe'
-        verbose_name_plural = 'Tag Recipes'
-        unique_together = ('recipe', 'tag')
-
-    def __str__(self):
-        return f'{self.recipe} {self.tag}'
 
 
 class FavoriteRecipe(models.Model):
