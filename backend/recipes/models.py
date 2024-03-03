@@ -58,6 +58,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ingredient'
         verbose_name_plural = 'Ingredients'
+        ordering = ('name', )
 
     def __str__(self):
         return self.name
@@ -163,7 +164,7 @@ class ShoppingCard(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Recipe',
-        related_name='added_to_shopping_cards'
+        related_name='shopping_cards'
     )
     user = models.ForeignKey(
         CustomUser,
