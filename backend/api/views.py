@@ -10,7 +10,7 @@ from .serializers import (
     TagSerializer,
     IngredientSerializer,
     RecipeListSerializer,
-    # RecipeSerializer,
+    RecipeSerializer,
 )
 from recipes.models import Tag, Ingredient, Recipe
 
@@ -35,4 +35,4 @@ class RecipeViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return RecipeListSerializer
-        # return RecipeSerializer
+        return RecipeSerializer

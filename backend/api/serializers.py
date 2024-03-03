@@ -13,6 +13,7 @@ from recipes.models import (
 )
 
 from users.serializers import CustomUserSerializer
+from users.models import CustomUser
 
 
 class Base64ImageField(serializers.ImageField):
@@ -98,3 +99,40 @@ class RecipeListSerializer(serializers.ModelSerializer):
                 user=request.user
             ).exists()
         return False
+
+
+class AddIngredientSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
+    )
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'amount']
+
+
+class RecipeSerializer(RecipeListSerializer):
+    ingredients = AddIngredientSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True,
+    )
+
+    def validate(self, data):
+        tags = data.get('tags')
+        if not tags:
+            raise serializers.ValidationError(
+                {'tags': 'Нужно выбрать хотябы один тег!'}
+            )
+        if len(tags) != len(set(tags)):
+            raise serializers.ValidationError(
+                {'tags': 'Теги должны быть уникальными!'}
+            )
+        return data
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
