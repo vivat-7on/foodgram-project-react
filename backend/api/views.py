@@ -1,5 +1,4 @@
 from rest_framework.viewsets import (
-    ModelViewSet,
     ReadOnlyModelViewSet
 )
 from rest_framework.response import Response
@@ -16,17 +15,10 @@ from recipes.models import Tag, Ingredient, Recipe
 from recipes.models import RecipeIngredient, TagRecipe
 
 
-class TagIngredientViewSetMixin(ModelViewSet):
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class TagViewSet(TagIngredientViewSetMixin):
+class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (AllowAny,)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -35,6 +27,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
+
+
 
 # class RecipeViewSet(viewsets.ModelViewSet):
 #     queryset = Recipe.objects.all()
