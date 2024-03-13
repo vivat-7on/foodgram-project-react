@@ -1,15 +1,13 @@
 from rest_framework.viewsets import (
     ReadOnlyModelViewSet,
-    ModelViewSet
+    ModelViewSet,
 )
-from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import filters
 
 from .serializers import (
     TagSerializer,
     IngredientSerializer,
-    RecipeListSerializer,
     RecipeSerializer,
 )
 from recipes.models import Tag, Ingredient, Recipe
@@ -33,8 +31,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
 
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return RecipeListSerializer
-        return RecipeSerializer
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
