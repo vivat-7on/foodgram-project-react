@@ -1,9 +1,22 @@
-from rest_framework.routers import DefaultRouter
+from django.urls import path
+from rest_framework.routers import SimpleRouter
 
 from .views import CustomUserViewSet
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register('', CustomUserViewSet, basename='users')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path(
+        'subscriptions/',
+        CustomUserViewSet.as_view({'get': 'subscriptions_list'}),
+        name='user-subscriptions-list'
+    ),
+    path(
+        '<int:id>/subscriptions/',
+        CustomUserViewSet.as_view({'get': 'subscriptions_detail'}),
+        name='user-subscriptions-detail'
+    ),
+]
 
+urlpatterns += router.urls
