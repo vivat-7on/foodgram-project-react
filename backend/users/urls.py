@@ -14,7 +14,10 @@ urlpatterns = [
     ),
     path(
         '<int:id>/subscriptions/',
-        CustomUserViewSet.as_view({'get': 'subscriptions_detail'}),
+        CustomUserViewSet.as_view({
+            'post': 'subscriptions_detail',
+            'delete': 'subscriptions_delete'
+        }),
         name='user-subscriptions-detail'
     ),
 ]
