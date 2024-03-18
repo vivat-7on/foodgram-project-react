@@ -168,3 +168,14 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         instance.save()
         return instance
+
+
+class RecipeFavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = [
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        ]

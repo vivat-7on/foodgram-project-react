@@ -1,16 +1,32 @@
+from django.db import transaction, IntegrityError
+from django.http import Http404
+from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST
+)
 from rest_framework.viewsets import (
     ReadOnlyModelViewSet,
     ModelViewSet,
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import filters
 
 from .serializers import (
+    RecipeFavoriteSerializer,
     TagSerializer,
     IngredientSerializer,
     RecipeSerializer,
 )
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import (
+    FavoriteRecipe,
+    Tag,
+    Ingredient,
+    Recipe
+)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -35,3 +51,51 @@ class RecipeViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class RecipeFavoriteViewSet(ModelViewSet):
+
+    @action(detail=True, permission_classes=[IsAuthenticated])
+    def favorite(self, request, id=None):
+        try:
+            recipe = get_object_or_404(Recipe, pk=id)
+            with transaction.atomic():
+                FavoriteRecipe.objects.create(
+                    recipe=recipe,
+                    user=self.request.user
+                )
+        except IntegrityError:
+            return Response(
+                {'error': 'Этот рецепт уже в вашем списке.'},
+                status=HTTP_400_BAD_REQUEST
+            )
+        except Http404:
+            return Response(
+                {'error': 'Такого рецепта нет.'},
+                status=HTTP_400_BAD_REQUEST
+            )
+        serializer = RecipeFavoriteSerializer(recipe)
+        return Response(serializer.data, status=HTTP_201_CREATED)
+
+    @action(detail=True, permission_classes=[IsAuthenticated])
+    def favorite_delete(self, request, id=None):
+        user = self.request.user
+        try:
+            recipe = get_object_or_404(Recipe, pk=id)
+            with transaction.atomic():
+                FavoriteRecipe.objects.filter(
+                    recipe=recipe,
+                    user=user
+                ).delete()
+        except Http404:
+            return Response(
+                {'error': 'Такого рецепта нет.'},
+                status=HTTP_400_BAD_REQUEST
+            )
+        except FavoriteRecipe.DoesNotExist:
+            return Response(
+                {'error': 'Такого рецепта нет.'},
+                status=HTTP_400_BAD_REQUEST
+            )
+
+        return Response(status=HTTP_204_NO_CONTENT)

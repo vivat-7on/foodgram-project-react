@@ -1,10 +1,11 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError, transaction
+from rest_framework.status import HTTP_204_NO_CONTENT
 
 from .models import CustomUser, Subscribe
 from .serializers import SubscriptionSerializer
@@ -41,11 +42,14 @@ class CustomUserViewSet(UserViewSet):
                     subscribed_to=subscribed_to
                 )
         except CustomUser.DoesNotExist:
-            return HttpResponse('Автор не найден.', status=400)
+            return Response(
+                'Автор не найден.',
+                status=HttpResponseBadRequest
+            )
         except IntegrityError:
             return HttpResponse(
                 'Вы уже подписанны на этого автора.',
-                status=400
+                status=HttpResponseBadRequest
             )
         serializer = SubscriptionSerializer(subscribed_to)
         return Response(serializer.data)
@@ -61,6 +65,9 @@ class CustomUserViewSet(UserViewSet):
                     subscribed_to=subscribed_to
                 ).delete()
         except CustomUser.DoesNotExist:
-            return HttpResponse('Автор не найден.', status=400)
+            return Response(
+                'Автор не найден.',
+                status=HttpResponseBadRequest
+            )
 
-        return HttpResponse(status=204)
+        return Response(status=HTTP_204_NO_CONTENT)
