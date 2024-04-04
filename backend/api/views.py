@@ -1,8 +1,9 @@
 from django.db import transaction, IntegrityError
-from django.http import FileResponse, Http404
+from django.http import Http404
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_204_NO_CONTENT,
@@ -24,11 +25,12 @@ from .serializers import (
 )
 from recipes.models import (
     FavoriteRecipe,
-    ShoppingCard,
+    RecipeIngredient, ShoppingCard,
     Ingredient,
     Recipe,
     Tag,
 )
+from .utils import generate_pdf
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -105,7 +107,27 @@ class RecipeFavoriteViewSet(ModelViewSet):
 
 class DownloadShoppingCartView(APIView):
     def get(self, request):
-        return Response({'id_get=': 'download_shopping_cart'})
+        #     result = {}
+        #     user = self.request.user
+        #     shopping_carts = ShoppingCard.objects.filter(user=user)
+        #     for shopping_cart in shopping_carts:
+        #         recipes = RecipeIngredient.objects.filter(
+        #             recipe=shopping_cart.recipe.id
+        #         )
+        #         for recipe in recipes:
+        #             ingredient = recipe.ingredient
+        #             amount = recipe.amount
+        #             measurement_unit = recipe.ingredient.measurement_unit
+        #             if ingredient in result:
+        #                 result[ingredient] = (
+        #                     result[ingredient][0] + amount, measurement_unit
+        #                 )
+        #             else:
+        #                 result[ingredient] = (amount, measurement_unit)
+
+        # template = 'recipes/recipe_pdf_template.html'
+        # context = {'data_objects': result}
+        return generate_pdf(request)
 
 
 class RecipeShoppingCartView(APIView):

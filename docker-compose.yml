@@ -1,0 +1,32 @@
+version: '3'
+
+volumes:
+  pg_data:
+  static:
+  media:
+
+services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend/
+    env_file: .env
+    volumes:
+      - static:/backend_static
+      - media:/media/ #уточнить
+
+  frontend:
+    env_file: .env
+    build: ./frontend/
+
+  gateway:
+    build: ./infra/
+    volumes:
+      - static:/staticfiles/
+      - media:/media/ #уточнить
+    ports:
+      - 8000:80
