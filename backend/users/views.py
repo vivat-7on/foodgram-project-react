@@ -22,6 +22,9 @@ class CustomUserViewSet(UserViewSet):
         subscribe_queryset = Subscribe.objects.filter(
             subscriber=self.request.user
         )
+        if not subscribe_queryset:
+            return HttpResponse(
+                'Вы не подписанны ни на одного автора.')
         for sub in subscribe_queryset:
             subscribed_to_id = sub.subscribed_to.id
             users = CustomUser.objects.filter(pk=subscribed_to_id)
