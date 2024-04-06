@@ -56,16 +56,20 @@ class Subscribe(models.Model):
     subscriber = models.ForeignKey(
         CustomUser,
         related_name='subscriptions',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Подписчик'
     )
     subscribed_to = models.ForeignKey(
         CustomUser,
         related_name='subscribers',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name='Подписывается на'
     )
 
     class Meta:
         unique_together = ('subscriber', 'subscribed_to')
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
 
     def __str__(self):
         return f'{self.subscriber} -> {self.subscribed_to}'
