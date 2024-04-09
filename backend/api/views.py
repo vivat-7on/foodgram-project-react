@@ -1,5 +1,6 @@
 from django.db import transaction, IntegrityError
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.shortcuts import render
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -25,7 +26,8 @@ from .serializers import (
 )
 from recipes.models import (
     FavoriteRecipe,
-    RecipeIngredient, ShoppingCard,
+    RecipeIngredient,
+    ShoppingCard,
     Ingredient,
     Recipe,
     Tag,
@@ -107,27 +109,29 @@ class RecipeFavoriteViewSet(ModelViewSet):
 
 class DownloadShoppingCartView(APIView):
     def get(self, request):
-        #     result = {}
-        #     user = self.request.user
-        #     shopping_carts = ShoppingCard.objects.filter(user=user)
-        #     for shopping_cart in shopping_carts:
-        #         recipes = RecipeIngredient.objects.filter(
-        #             recipe=shopping_cart.recipe.id
-        #         )
-        #         for recipe in recipes:
-        #             ingredient = recipe.ingredient
-        #             amount = recipe.amount
-        #             measurement_unit = recipe.ingredient.measurement_unit
-        #             if ingredient in result:
-        #                 result[ingredient] = (
-        #                     result[ingredient][0] + amount, measurement_unit
-        #                 )
-        #             else:
-        #                 result[ingredient] = (amount, measurement_unit)
+        result = {}
+        user = self.request.user
+        shopping_carts = ShoppingCard.objects.filter(user=user)
+        for shopping_cart in shopping_carts:
+            recipes = RecipeIngredient.objects.filter(
+                recipe=shopping_cart.recipe.id
+            )
+            for recipe in recipes:
+                ingredient = str(recipe.ingredient)
+                amount = recipe.amount
+                measurement_unit = recipe.ingredient.measurement_unit
+                if ingredient in result:
+                    result[ingredient] = (
+                        result[ingredient][0] + amount, measurement_unit
+                    )
+                else:
+                    result[ingredient] = (amount, measurement_unit)
 
-        # template = 'recipes/recipe_pdf_template.html'
-        # context = {'data_objects': result}
-        return generate_pdf(request)
+        template = 'recipes/recipe_pdf_template.html'
+        context = {'data_objects': result}
+        html_doc = render(request, template, context)
+        return generate_pdf(request, html_doc.content)
+        # return render(request, template, context)
 
 
 class RecipeShoppingCartView(APIView):

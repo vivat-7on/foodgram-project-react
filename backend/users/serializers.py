@@ -11,6 +11,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         model = CustomUser
         fields = [
             'email',
+            'id',
             'username',
             'first_name',
             'last_name',

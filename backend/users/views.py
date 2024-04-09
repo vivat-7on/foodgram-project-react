@@ -8,7 +8,10 @@ from django.db import IntegrityError, transaction
 from rest_framework.status import HTTP_204_NO_CONTENT
 
 from .models import CustomUser, Subscribe
-from .serializers import SubscriptionSerializer
+from .serializers import (
+    CustomUserCreateSerializer,
+    SubscriptionSerializer
+)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -47,13 +50,14 @@ class CustomUserViewSet(UserViewSet):
         except CustomUser.DoesNotExist:
             return Response(
                 'Автор не найден.',
-                status=HttpResponseBadRequest
+                status=500
             )
         except IntegrityError:
-            return HttpResponse(
+            return Response(
                 'Вы уже подписанны на этого автора.',
-                status=HttpResponseBadRequest
+                status=500
             )
+        subscribed_to.is_subscribed = True
         serializer = SubscriptionSerializer(subscribed_to)
         return Response(serializer.data)
 
@@ -70,7 +74,7 @@ class CustomUserViewSet(UserViewSet):
         except CustomUser.DoesNotExist:
             return Response(
                 'Автор не найден.',
-                status=HttpResponseBadRequest
+                status=500
             )
-
+        subscribed_to.is_subscribed = False
         return Response(status=HTTP_204_NO_CONTENT)
