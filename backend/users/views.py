@@ -1,20 +1,21 @@
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db import IntegrityError, transaction
 from rest_framework.status import HTTP_204_NO_CONTENT
 
 from .models import CustomUser, Subscribe
 from .serializers import (
-    CustomUserCreateSerializer,
+    CustomUserSerializer,
     SubscriptionSerializer
 )
 
 
 class CustomUserViewSet(UserViewSet):
+    serializer_class = CustomUserSerializer
 
     def get_queryset(self):
         queryset = CustomUser.objects.all()

@@ -23,6 +23,8 @@ from rest_framework.permissions import (
 )
 from rest_framework import filters
 
+from .filters import IngredientFilterBackend
+from .pagination import CustomPagination
 from .serializers import (
     RecipeFavoriteSerializer,
     TagSerializer,
@@ -51,8 +53,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
+    filter_backends = (IngredientFilterBackend,)
     pagination_class = None
 
 
@@ -62,6 +63,7 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     filterset_fields = ['author__id', 'tags__name']
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -176,6 +178,8 @@ class DownloadShoppingCartView(APIView):
 
 
 class RecipeShoppingCartView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id=None):
         try:
             recipe = get_object_or_404(Recipe, pk=id)
