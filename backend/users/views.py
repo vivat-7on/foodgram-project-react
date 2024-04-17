@@ -3,7 +3,10 @@ from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 from django.db import IntegrityError, transaction
 from rest_framework.status import HTTP_204_NO_CONTENT
 
@@ -15,11 +18,18 @@ from .serializers import (
 
 
 class CustomUserViewSet(UserViewSet):
+    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         queryset = CustomUser.objects.all()
         return queryset
+
+    def get_permissions(self):
+        if self.action == "me":
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
 
     @action(detail=False)
     def subscriptions_list(self, request):

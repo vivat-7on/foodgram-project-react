@@ -135,6 +135,7 @@ DJOSER = {
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],
         'user': ['djoser.permissions.CurrentUserOrAdmin'],
+        'user_me': ['rest_framework.permissions.IsAuthenticated'],
     }
 }
 CSRF_COOKIE_SECURE = False
