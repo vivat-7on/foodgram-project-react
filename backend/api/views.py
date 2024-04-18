@@ -21,7 +21,7 @@ from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
-from rest_framework import filters
+from rest_framework import filters, status
 
 from .filters import IngredientFilterBackend
 from .pagination import CustomPagination

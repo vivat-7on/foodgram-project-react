@@ -79,7 +79,8 @@ class Recipe(models.Model):
         upload_to='uploads/',
         default=None,
         blank=True,
-        verbose_name='Картинка'
+        verbose_name='Картинка',
+
     )
     text = models.TextField(verbose_name='Описание')
     cooking_time = models.IntegerField(
