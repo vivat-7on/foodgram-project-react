@@ -64,6 +64,12 @@ class SubscriptionSerializer(ModelSerializer):
 
     def get_recipes(self, obj):
         queryset = Recipe.objects.filter(author=obj.id)
+        recipes_limit = self.context.get('recipes_limit')
+        if recipes_limit is not None:
+            return RecipeSubscribeSerializer(
+                queryset[:int(recipes_limit)],
+                many=True
+            ).data
         return RecipeSubscribeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):

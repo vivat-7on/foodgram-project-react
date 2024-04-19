@@ -2,14 +2,13 @@ from django.db import transaction, IntegrityError
 from django.http import Http404
 from django.shortcuts import render
 from rest_framework.decorators import action
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_204_NO_CONTENT,
-    HTTP_400_BAD_REQUEST
 )
 from rest_framework.views import APIView
 from rest_framework.viewsets import (
@@ -74,7 +73,6 @@ class RecipeViewSet(ModelViewSet):
         tags = self.request.query_params.getlist('tags', [])
         if tags:
             queryset = queryset.filter(tags__slug__in=tags)
-
         is_favorited = self.request.query_params.get('is_favorited', '0')
         try:
             if is_favorited == '1' and self.request.user.is_authenticated:
@@ -98,6 +96,25 @@ class RecipeViewSet(ModelViewSet):
             raise ParseError(detail='Invalid value for is_in_shopping_cart')
         return queryset
 
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        instance = self.get_object()
+        if user != instance.author:
+            raise PermissionDenied
+        ingredient = request.data.get('ingredients')
+        tags = request.data.get('tags')
+        if not (ingredient and tags):
+            raise ParseError("Ingredient and tags are required.")
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        user = request.user
+        instance = self.get_object()
+        if user != instance.author:
+            raise PermissionDenied
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -114,15 +131,9 @@ class RecipeFavoriteViewSet(ModelViewSet):
                     user=self.request.user
                 )
         except IntegrityError:
-            return Response(
-                {'error': 'Этот рецепт уже в вашем списке.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise ParseError
         except Http404:
-            return Response(
-                {'error': 'Такого рецепта нет.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise NotFound
         serializer = RecipeFavoriteSerializer(recipe)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
@@ -137,15 +148,9 @@ class RecipeFavoriteViewSet(ModelViewSet):
                     user=user
                 ).delete()
         except Http404:
-            return Response(
-                {'error': 'Такого рецепта нет.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise ParseError
         except FavoriteRecipe.DoesNotExist:
-            return Response(
-                {'error': 'Такого рецепта нет.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise ParseError
 
         return Response(status=HTTP_204_NO_CONTENT)
 
@@ -189,15 +194,9 @@ class RecipeShoppingCartView(APIView):
                     user=self.request.user
                 )
         except IntegrityError:
-            return Response(
-                {'error': 'Этот рецепт уже в вашем списке покупок.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise ParseError
         except Http404:
-            return Response(
-                {'error': 'Такого рецепта нет.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise NotFound
         serializer = RecipeFavoriteSerializer(recipe)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
@@ -211,14 +210,8 @@ class RecipeShoppingCartView(APIView):
                     user=user
                 ).delete()
         except Http404:
-            return Response(
-                {'error': 'Такого рецепта нет.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise NotFound
         except ShoppingCard.DoesNotExist:
-            return Response(
-                {'error': 'Такого рецепта нет.'},
-                status=HTTP_400_BAD_REQUEST
-            )
+            raise ParseError
 
         return Response(status=HTTP_204_NO_CONTENT)
