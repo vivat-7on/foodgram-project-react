@@ -85,7 +85,7 @@ class RecipeViewSet(ModelViewSet):
                     user=self.request.user
                 ).values_list('recipe_id', flat=True)
                 queryset = queryset.filter(id__in=favorited_recipes)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             raise ParseError(detail='Invalid value for is_favorited')
 
         is_in_shopping_cart = self.request.query_params.get(
@@ -97,7 +97,7 @@ class RecipeViewSet(ModelViewSet):
                     user=self.request.user
                 ).values_list('recipe_id', flat=True)
                 queryset = queryset.filter(id__in=shopping_cart_recipes)
-        except (ValueError, TypeError) as e:
+        except (ValueError, TypeError):
             raise ParseError(detail='Invalid value for is_in_shopping_cart')
         return queryset
 

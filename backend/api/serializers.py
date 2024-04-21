@@ -145,7 +145,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags_list = []
         for tag_id in tags:
             try:
-                tag = Tag.objects.get(id=tag_id)
+                Tag.objects.get(id=tag_id)
             except Tag.DoesNotExist:
                 raise serializers.ValidationError({
                     'tags': f'Тег с id {tag_id} не существует!'

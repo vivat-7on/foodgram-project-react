@@ -21,7 +21,7 @@ def generate_pdf(request, html_content):
 
     styles = getSampleStyleSheet()
     style_normal = styles['Normal']
-    style_heading = styles['Heading1']
+    # style_heading = styles['Heading1']
 
     paragraphs = [Paragraph(html_content, style_normal)]
     pdf.build(paragraphs)
