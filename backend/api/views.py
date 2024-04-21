@@ -2,7 +2,12 @@ from django.db import transaction, IntegrityError
 from django.http import Http404
 from django.shortcuts import render
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
+from rest_framework.exceptions import (
+    AuthenticationFailed,
+    NotFound,
+    ParseError,
+    PermissionDenied
+)
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
@@ -123,35 +128,42 @@ class RecipeFavoriteViewSet(ModelViewSet):
 
     @action(detail=True, permission_classes=[IsAuthenticated])
     def favorite(self, request, id=None):
+        if not request.user.is_authenticated:
+            raise AuthenticationFailed
         try:
             recipe = get_object_or_404(Recipe, pk=id)
+            if FavoriteRecipe.objects.filter(
+                    recipe=recipe,
+                    user=self.request.user
+            ).exists():
+                raise ParseError
             with transaction.atomic():
                 FavoriteRecipe.objects.create(
                     recipe=recipe,
                     user=self.request.user
                 )
-        except IntegrityError:
-            raise ParseError
         except Http404:
-            raise NotFound
+            raise ParseError
         serializer = RecipeFavoriteSerializer(recipe)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     @action(detail=True, permission_classes=[IsAuthenticated])
     def favorite_delete(self, request, id=None):
         user = self.request.user
+        if not user.is_authenticated:
+            raise AuthenticationFailed
         try:
             recipe = get_object_or_404(Recipe, pk=id)
             with transaction.atomic():
-                FavoriteRecipe.objects.filter(
+                favorite_recipe = FavoriteRecipe.objects.filter(
                     recipe=recipe,
                     user=user
-                ).delete()
+                )
+                if not favorite_recipe.exists():
+                    raise ParseError
+                favorite_recipe.delete()
         except Http404:
-            raise ParseError
-        except FavoriteRecipe.DoesNotExist:
-            raise ParseError
-
+            raise NotFound
         return Response(status=HTTP_204_NO_CONTENT)
 
 
@@ -196,7 +208,7 @@ class RecipeShoppingCartView(APIView):
         except IntegrityError:
             raise ParseError
         except Http404:
-            raise NotFound
+            raise ParseError
         serializer = RecipeFavoriteSerializer(recipe)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
@@ -205,13 +217,13 @@ class RecipeShoppingCartView(APIView):
         try:
             recipe = get_object_or_404(Recipe, pk=id)
             with transaction.atomic():
-                ShoppingCard.objects.filter(
+                shopping_card = ShoppingCard.objects.filter(
                     recipe=recipe,
                     user=user
-                ).delete()
+                )
+                if not shopping_card.exists():
+                    raise ParseError
+                shopping_card.delete()
         except Http404:
             raise NotFound
-        except ShoppingCard.DoesNotExist:
-            raise ParseError
-
         return Response(status=HTTP_204_NO_CONTENT)

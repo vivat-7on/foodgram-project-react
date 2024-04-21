@@ -109,7 +109,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return self._is_related_to_user(obj, ShoppingCard)
 
     def validate(self, data):
-        print('self.initial_data', self.initial_data)
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError({
@@ -158,7 +157,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Теги должны быть уникальными!')
 
         data['tags'] = tags_list
-        print(data)
         return data
 
     def create(self, validated_data):
