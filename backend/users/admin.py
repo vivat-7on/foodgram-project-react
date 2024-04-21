@@ -29,6 +29,3 @@ class SubscribeAdmin(admin.ModelAdmin):
     list_display_links = ('subscriber', 'subscribed_to')
     ordering = ('subscriber', 'subscribed_to')
     list_filter = ('subscriber', 'subscribed_to')
-
-
-
