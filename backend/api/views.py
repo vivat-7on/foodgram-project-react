@@ -190,8 +190,8 @@ class DownloadShoppingCartView(APIView):
         template = 'recipes/recipe_pdf_template.html'
         context = {'data_objects': result}
         html_doc = render(request, template, context)
-        return generate_pdf(request, html_doc.content)
-        # return render(request, template, context)
+        # return generate_pdf(request, html_doc.content)
+        return render(request, template, context)
 
 
 class RecipeShoppingCartView(APIView):

@@ -1,6 +1,8 @@
 # flake8: noqa
 import os
 import dotenv
+import pdfkit
+
 
 
 
@@ -16,7 +18,7 @@ dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = 'h!(-^5m3o#9b5^+djt65@w$*-@@sda34%0hli*q01y(f2$@++n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
