@@ -16,10 +16,10 @@ dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = 'h!(-^5m3o#9b5^+djt65@w$*-@@sda34%0hli*q01y(f2$@++n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -144,7 +144,7 @@ CSRF_COOKIE_SECURE = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'backend/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -162,9 +162,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 BASE_URL = '/backend'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
