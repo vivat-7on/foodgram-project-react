@@ -1,6 +1,5 @@
 from django.db import transaction, IntegrityError
-from django.http import Http404
-from django.shortcuts import render
+from django.http import Http404, HttpResponse
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     AuthenticationFailed,
@@ -186,12 +185,14 @@ class DownloadShoppingCartView(APIView):
                     )
                 else:
                     result[ingredient] = (amount, measurement_unit)
+        content = ""
+        for ingredient, (amount, measurement_unit) in result.items():
+            content += f"{ingredient}: {amount} {measurement_unit}\n"
 
-        template = 'recipes/recipe_pdf_template.html'
-        context = {'data_objects': result}
-        html_doc = render(request, template, context)
-        # return generate_pdf(request, html_doc.content)
-        return render(request, template, context)
+        response = HttpResponse(content, content_type='text/plain')
+        response[
+            'Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        return response
 
 
 class RecipeShoppingCartView(APIView):

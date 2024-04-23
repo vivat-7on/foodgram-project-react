@@ -3,10 +3,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfbase import pdfmetrics
-
-pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
 
 styles = getSampleStyleSheet()
 style_normal = styles['Normal']
