@@ -26,17 +26,19 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - static:/static/
+      - static:/static
 
     depends_on:
       - db
 
   nginx:
-    build: ./infra/
+    build:
+      context: ./infra/
+      dockerfile: Dockerfile
     ports:
       - "8000:80"
     volumes:
-      - static:/staticfiles/
+      - static:/app/staticfiles/
       - media:/app/media/
     depends_on:
       - backend

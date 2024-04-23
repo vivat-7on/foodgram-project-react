@@ -42,7 +42,6 @@ from recipes.models import (
     Recipe,
     Tag,
 )
-from .utils import generate_pdf
 
 
 class TagViewSet(ReadOnlyModelViewSet):
