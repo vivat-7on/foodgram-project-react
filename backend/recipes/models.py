@@ -1,9 +1,5 @@
-from django.core.validators import (
-    MaxLengthValidator,
-    MinLengthValidator,
-    RegexValidator,
-    MinValueValidator,
-)
+from django.core.validators import (MaxLengthValidator, MinLengthValidator,
+                                    MinValueValidator, RegexValidator)
 from django.db import models
 
 from users.models import CustomUser

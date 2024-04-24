@@ -1,47 +1,24 @@
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import Http404, HttpResponse
-from rest_framework.decorators import action
-from rest_framework.exceptions import (
-    AuthenticationFailed,
-    NotFound,
-    ParseError,
-    PermissionDenied
-)
-from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
-
-from rest_framework.status import (
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-)
-from rest_framework.views import APIView
-from rest_framework.viewsets import (
-    ReadOnlyModelViewSet,
-    ModelViewSet,
-)
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
-)
 from rest_framework import filters, status
+from rest_framework.decorators import action
+from rest_framework.exceptions import (AuthenticationFailed, NotFound,
+                                       ParseError, PermissionDenied)
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCard, Tag)
 
 from .filters import IngredientFilterBackend
 from .pagination import CustomPagination
-from .serializers import (
-    RecipeFavoriteSerializer,
-    TagSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-)
-from recipes.models import (
-    FavoriteRecipe,
-    RecipeIngredient,
-    ShoppingCard,
-    Ingredient,
-    Recipe,
-    Tag,
-)
+from .serializers import (IngredientSerializer, RecipeFavoriteSerializer,
+                          RecipeSerializer, TagSerializer)
 
 
 class TagViewSet(ReadOnlyModelViewSet):

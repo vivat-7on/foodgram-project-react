@@ -1,19 +1,11 @@
 import base64
 
-from rest_framework import serializers
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCard, Tag)
+from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
-from recipes.models import (
-    Tag,
-    Ingredient,
-    Recipe,
-    FavoriteRecipe,
-    ShoppingCard,
-    RecipeIngredient,
-)
-
 from users.serializers import CustomUserSerializer
 
 
