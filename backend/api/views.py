@@ -52,7 +52,7 @@ class RecipeViewSet(ModelViewSet):
 
         tags = self.request.query_params.getlist('tags', [])
         if tags:
-            queryset = queryset.filter(tags__slug__in=tags)
+            queryset = queryset.filter(tags__slug__in=tags).distinct()
         is_favorited = self.request.query_params.get('is_favorited', '0')
         try:
             if is_favorited == '1' and self.request.user.is_authenticated:
