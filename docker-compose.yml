@@ -25,8 +25,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    command: cp -r /app/result_build/. /frontend_static/
     volumes:
-      - static:/static
+        - static:/frontend_static
 
     depends_on:
       - db
@@ -38,7 +39,7 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - static:/app/staticfiles/
+      - static:/staticfiles/
       - media:/app/media/
     depends_on:
       - backend
