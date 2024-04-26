@@ -1,3 +1,5 @@
+from api.pagination import CustomPagination
+from backend import settings
 from django.db import IntegrityError, transaction
 from djoser.views import UserViewSet
 from rest_framework import status
@@ -9,8 +11,6 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 
-from backend import settings
-
 from .models import CustomUser, Subscribe
 from .serializers import CustomUserSerializer, SubscriptionSerializer
 
@@ -19,6 +19,7 @@ class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = CustomUser.objects.all()

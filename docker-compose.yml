@@ -25,7 +25,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    command: cp -r /app/result_build/. /frontend_static/
+    command: cp -r /app/build/. /frontend_static/
     volumes:
         - static:/frontend_static
 
