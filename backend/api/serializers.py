@@ -66,7 +66,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField(
-        required=True,
+        required=False,
         allow_null=True,
     )
 
