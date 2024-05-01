@@ -101,55 +101,43 @@ class RecipeSerializer(serializers.ModelSerializer):
         return self._is_related_to_user(obj, ShoppingCard)
 
     def validate(self, data):
+        self.validate_ingredients(data)
+        self.validate_tags(data)
+        return data
+
+    def validate_ingredients(self, data):
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError({
-                'ingredients': ':Добавьте хотябы один ингредиент!'})
-        ingredient_list = []
+                'ingredients': 'Добавьте хотя бы один ингредиент!'
+            })
+        ingredient_ids = []
         for ingredient_item in ingredients:
             ingredient_id = ingredient_item.get('id')
-            try:
-                ingredient = Ingredient.objects.get(id=ingredient_id)
-            except Ingredient.DoesNotExist:
+            if ingredient_id in ingredient_ids:
                 raise serializers.ValidationError({
-                    'ingredients': f'Ингредиент с id {ingredient_id} '
-                                   f'не существует!'
+                    'ingredients': 'Ингредиенты должны быть уникальными!'
+                })
+            ingredient_ids.append(ingredient_id)
+            amount = ingredient_item.get('amount', 0)
+            if amount < 1:
+                raise serializers.ValidationError({
+                    'ingredients': 'Количество ингредиента должно быть больше нуля!'
                 })
 
-            if ingredient in ingredient_list:
-                raise serializers.ValidationError(
-                    'Ингридиенты должны быть уникальными!'
-                )
-            if int(ingredient_item['amount']) < 1:
-                raise serializers.ValidationError({
-                    'ingredients': (
-                        'Количество ингредиента должно быть больше нуля!'
-                    )
-                })
-            ingredient_list.append(ingredient)
-        data['ingredients'] = ingredients
-
+    def validate_tags(self, data):
         tags = self.initial_data.get('tags')
-
         if not tags:
             raise serializers.ValidationError({
-                'tags': ':Добавьте хотябы один тег!'})
-        tags_list = []
+                'tags': 'Добавьте хотя бы один тег!'
+            })
+        tag_ids = []
         for tag_id in tags:
-            try:
-                Tag.objects.get(id=tag_id)
-            except Tag.DoesNotExist:
+            if tag_id in tag_ids:
                 raise serializers.ValidationError({
-                    'tags': f'Тег с id {tag_id} не существует!'
+                    'tags': 'Теги должны быть уникальными!'
                 })
-
-            tags_list.append(tag_id)
-
-        if len(set(tags_list)) != len(tags_list):
-            raise serializers.ValidationError('Теги должны быть уникальными!')
-
-        data['tags'] = tags_list
-        return data
+            tag_ids.append(tag_id)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
