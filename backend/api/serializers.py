@@ -122,7 +122,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             amount = ingredient_item.get('amount', 0)
             if amount < 1:
                 raise serializers.ValidationError({
-                    'ingredients': 'Количество ингредиента должно быть больше нуля!'
+                    'ingredients': 'Количество должно быть больше нуля!'
                 })
 
     def validate_tags(self, data):
