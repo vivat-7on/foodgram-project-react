@@ -25,7 +25,7 @@ jobs:
     - name: Load environment variables
       run: |
         set -a
-        source ../../.env
+        source /Users/7on/Dev/foodgram-project-react/.env
         set +a
 
     - name: Test with flake8 and django tests
