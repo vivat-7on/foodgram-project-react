@@ -21,10 +21,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip         
         pip install -r ./backend/requirements.txt
-        python -m dotenv .env
+
+    - name: Load environment variables
+      run: |
+        set -a
+        source .env
+        set +a
 
     - name: Test with flake8 and django tests
       run: |
         python -m flake8 backend/
         cd backend/
         python manage.py test
+
