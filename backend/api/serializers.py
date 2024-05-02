@@ -21,13 +21,13 @@ class Base64ImageField(serializers.ImageField):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'name', 'color', 'slug']
+        fields = ('id', 'name', 'color', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ['id', 'name', 'measurement_unit']
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -72,7 +72,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = [
+        fields = (
             'id',
             'tags',
             'author',
@@ -83,7 +83,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'image',
             'text',
             'cooking_time',
-        ]
+        )
 
     def _is_related_to_user(self, obj, model):
         request = self.context.get('request')
@@ -182,9 +182,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 class RecipeFavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = [
+        fields = (
             'id',
             'name',
             'image',
             'cooking_time',
-        ]
+        )
