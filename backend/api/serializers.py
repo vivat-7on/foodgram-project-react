@@ -1,9 +1,11 @@
 import base64
 
 from django.core.files.base import ContentFile
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+
 from users.serializers import CustomUserSerializer
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCard, Tag)
@@ -46,7 +48,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields = ['id', 'name', 'measurement_unit', 'amount']
+        fields = ('id', 'name', 'measurement_unit', 'amount')
         validators = [
             UniqueTogetherValidator(
                 queryset=RecipeIngredient.objects.all(),
@@ -68,6 +70,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
         required=False,
         allow_null=True,
+    )
+    cooking_time = serializers.ImageField(
+        validators=[MinValueValidator(1), MaxValueValidator(999)]
     )
 
     class Meta:
@@ -165,7 +170,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         tags_data = self.initial_data.get('tags')
         instance.tags.set(tags_data)
-        RecipeIngredient.objects.filter(recipe=instance).all().delete()
+        RecipeIngredient.objects.filter(recipe=instance).delete()
         ingredients = validated_data.pop('ingredients')
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
