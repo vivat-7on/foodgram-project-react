@@ -80,10 +80,31 @@ class RecipeViewSet(ModelViewSet):
         instance = self.get_object()
         if user != instance.author:
             raise PermissionDenied
-        ingredient = request.data.get('ingredients')
+
+        ingredients = request.data.get('ingredients')
         tags = request.data.get('tags')
-        if not (ingredient and tags):
+
+        if not (ingredients and tags):
             raise ParseError("Ingredient and tags are required.")
+
+        instance.tags.set(tags)
+
+        if ingredients:
+            for ingredient_data in ingredients:
+                ingredient_id = ingredient_data['id']
+                ingredient_obj = get_object_or_404(Ingredient,
+                                                   pk=ingredient_id)
+
+                recipe_ingredient, created = RecipeIngredient.objects.get_or_create(
+                    recipe=instance,
+                    ingredient=ingredient_obj,
+                    defaults={'amount': ingredient_data['amount']}
+                )
+
+                if not created:
+                    recipe_ingredient.amount = ingredient_data['amount']
+                    recipe_ingredient.save()
+
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
@@ -161,7 +182,8 @@ class DownloadShoppingCartView(APIView):
                     measurement_unit = recipe.ingredient.measurement_unit
                     if ingredient_str in ing_am_un:
                         ing_am_un[ingredient_str] = (
-                            ing_am_un[ingredient_str][0] + amount, measurement_unit
+                            ing_am_un[ingredient_str][0] + amount,
+                            measurement_unit
                         )
                     else:
                         ing_am_un[ingredient_str] = (amount, measurement_unit)
