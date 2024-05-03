@@ -4,8 +4,8 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from recipes.models import Recipe
 
+from recipes.models import Recipe
 from .models import CustomUser
 
 
@@ -81,7 +81,7 @@ class SubscriptionSerializer(ModelSerializer):
 
     def get_recipes(self, obj):
         queryset = Recipe.objects.filter(author=obj.id)
-        recipes_limit = self.context.get('recipes_limit')
+        recipes_limit = self.context.get('recipes_limit', 0)
         if recipes_limit is not None:
             return RecipeSubscribeSerializer(
                 queryset[:int(recipes_limit)],

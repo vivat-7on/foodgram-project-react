@@ -68,10 +68,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField(
-        required=False,
+        required=True,
         allow_null=True,
     )
-    cooking_time = serializers.ImageField(
+    cooking_time = serializers.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999)]
     )
 
@@ -147,21 +147,26 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        image = validated_data.pop('image')
-        recipe = Recipe.objects.create(image=image, **validated_data)
+
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
+
+        recipe_ingredients = []
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
-            ingredient_obj = get_object_or_404(Ingredient, pk=ingredient_id)
-            RecipeIngredient.objects.create(
+            ingredient_obj = get_object_or_404(Ingredient,
+                                               pk=ingredient_id)
+            recipe_ingredients.append(RecipeIngredient(
                 recipe=recipe,
                 amount=ingredient['amount'],
                 ingredient=ingredient_obj,
-            )
+            ))
+
+        RecipeIngredient.objects.bulk_create(recipe_ingredients)
+
         return recipe
 
     def update(self, instance, validated_data):
-        instance.image = validated_data.get('image', instance.image)
         instance.name = validated_data.get('name', instance.name)
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(

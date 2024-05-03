@@ -36,7 +36,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(ModelViewSet):
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related('author').prefetch_related('tags')
     serializer_class = RecipeSerializer
     filter_backends = (filters.SearchFilter,)
     filterset_fields = ['author__id', 'tags__name']
@@ -65,8 +65,8 @@ class RecipeViewSet(ModelViewSet):
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart', '0')
         try:
-            if is_in_shopping_cart == '1' \
-                    and self.request.user.is_authenticated:
+            if (is_in_shopping_cart == '1' and
+                    self.request.user.is_authenticated):
                 shopping_cart_recipes = ShoppingCard.objects.filter(
                     user=self.request.user
                 ).values_list('recipe_id', flat=True)
@@ -143,7 +143,7 @@ class RecipeFavoriteViewSet(ModelViewSet):
 
 class DownloadShoppingCartView(APIView):
     def get(self, request):
-        result = {}
+        ing_am_un = {}
         user = self.request.user
         shopping_carts = ShoppingCard.objects.filter(user=user)
         for shopping_cart in shopping_carts:
@@ -151,17 +151,22 @@ class DownloadShoppingCartView(APIView):
                 recipe=shopping_cart.recipe.id
             )
             for recipe in recipes:
-                ingredient = str(recipe.ingredient)
-                amount = recipe.amount
-                measurement_unit = recipe.ingredient.measurement_unit
-                if ingredient in result:
-                    result[ingredient] = (
-                        result[ingredient][0] + amount, measurement_unit
-                    )
-                else:
-                    result[ingredient] = (amount, measurement_unit)
+                ingredient = recipe.ingredient
+                if ingredient is not None:
+                    try:
+                        ingredient_str = str(ingredient)
+                    except Exception as e:
+                        ingredient_str = f'Error {e}'
+                        amount = recipe.amount
+                    measurement_unit = recipe.ingredient.measurement_unit
+                    if ingredient_str in ing_am_un:
+                        ing_am_un[ingredient_str] = (
+                            ing_am_un[ingredient_str][0] + amount, measurement_unit
+                        )
+                    else:
+                        ing_am_un[ingredient_str] = (amount, measurement_unit)
         content = ""
-        for ingredient, (amount, measurement_unit) in result.items():
+        for ingredient, (amount, measurement_unit) in ing_am_un.items():
             content += f"{ingredient}: {amount} {measurement_unit}\n"
 
         response = HttpResponse(content, content_type='text/plain')

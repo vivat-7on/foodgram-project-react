@@ -1,6 +1,8 @@
 from django.core.validators import (MaxLengthValidator, MinLengthValidator,
-                                    MinValueValidator, RegexValidator)
+                                    MinValueValidator, RegexValidator,
+                                    MaxValueValidator)
 from django.db import models
+
 from users.models import CustomUser
 
 
@@ -54,7 +56,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингредиет'
+        verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
 
@@ -79,7 +81,7 @@ class Recipe(models.Model):
     )
     text = models.TextField(verbose_name='Описание')
     cooking_time = models.IntegerField(
-        validators=[MinValueValidator(1)],
+        validators=[MinValueValidator(1), MaxValueValidator(999)],
         verbose_name='Время приготовления'
     )
     tags = models.ManyToManyField(Tag, verbose_name='Теги')
@@ -162,4 +164,5 @@ class ShoppingCard(models.Model):
         unique_together = ('recipe', 'user')
 
     def __str__(self):
-        return f'{self.recipe} is {self.user.username}\'s card'
+        if self.user.username is not None:
+            return f'{self.recipe} is {self.user.username}\'s card'
