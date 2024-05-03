@@ -65,8 +65,8 @@ class RecipeViewSet(ModelViewSet):
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart', '0')
         try:
-            if (is_in_shopping_cart == '1' and
-                    self.request.user.is_authenticated):
+            if (is_in_shopping_cart == '1'
+                    and self.request.user.is_authenticated):
                 shopping_cart_recipes = ShoppingCard.objects.filter(
                     user=self.request.user
                 ).values_list('recipe_id', flat=True)
@@ -94,8 +94,9 @@ class RecipeViewSet(ModelViewSet):
                 ingredient_id = ingredient_data['id']
                 ingredient_obj = get_object_or_404(Ingredient,
                                                    pk=ingredient_id)
-
-                recipe_ingredient, created = RecipeIngredient.objects.get_or_create(
+                (
+                    recipe_ingredient, created
+                ) = RecipeIngredient.objects.get_or_create(
                     recipe=instance,
                     ingredient=ingredient_obj,
                     defaults={'amount': ingredient_data['amount']}
