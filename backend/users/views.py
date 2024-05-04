@@ -1,5 +1,5 @@
-from api.pagination import CustomPagination
 from django.db import IntegrityError, transaction
+from django.conf import settings
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,9 +10,8 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 
-from backend import settings
-
 from .models import CustomUser, Subscribe
+from api.pagination import CustomPagination
 from .serializers import CustomUserSerializer, SubscriptionSerializer
 
 

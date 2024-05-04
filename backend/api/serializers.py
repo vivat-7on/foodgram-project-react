@@ -152,15 +152,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags)
 
         recipe_ingredients = []
+        ingredient_ids = [ingredient['id'] for ingredient in ingredients]
+        ingredient_objs = Ingredient.objects.in_bulk(ingredient_ids)
         for ingredient in ingredients:
-            ingredient_id = ingredient['id']
-            ingredient_obj = get_object_or_404(Ingredient,
-                                               pk=ingredient_id)
-            recipe_ingredients.append(RecipeIngredient(
-                recipe=recipe,
-                amount=ingredient['amount'],
-                ingredient=ingredient_obj,
-            ))
+            ingredient_obj = ingredient_objs.get(ingredient['id'])
+            if ingredient_obj:
+                recipe_ingredients.append(RecipeIngredient(
+                    recipe=recipe,
+                    amount=ingredient['amount'],
+                    ingredient=ingredient_obj,
+                ))
 
         RecipeIngredient.objects.bulk_create(recipe_ingredients)
 
@@ -173,18 +174,20 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         instance.tags.clear()
-        tags_data = self.initial_data.get('tags')
+        tags_data = validated_data.get('tags')
         instance.tags.set(tags_data)
         RecipeIngredient.objects.filter(recipe=instance).delete()
         ingredients = validated_data.pop('ingredients')
+        ingredient_ids = [ingredient['id'] for ingredient in ingredients]
+        ingredient_objs = Ingredient.objects.in_bulk(ingredient_ids)
         for ingredient in ingredients:
-            ingredient_id = ingredient['id']
-            ingredient_obj = get_object_or_404(Ingredient, pk=ingredient_id)
-            RecipeIngredient.objects.create(
-                recipe=instance,
-                amount=ingredient['amount'],
-                ingredient=ingredient_obj,
-            )
+            ingredient_obj = ingredient_objs.get(ingredient['id'])
+            if ingredient_obj:
+                RecipeIngredient.objects.create(
+                    recipe=instance,
+                    amount=ingredient['amount'],
+                    ingredient=ingredient_obj,
+                )
         instance.save()
         return instance
 

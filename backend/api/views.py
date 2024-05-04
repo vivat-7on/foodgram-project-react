@@ -90,21 +90,21 @@ class RecipeViewSet(ModelViewSet):
         instance.tags.set(tags)
 
         if ingredients:
+            ingredient_ids = [ingredient['id'] for ingredient in ingredients]
+            ingredient_objs = Ingredient.objects.in_bulk(ingredient_ids)
             for ingredient_data in ingredients:
                 ingredient_id = ingredient_data['id']
-                ingredient_obj = get_object_or_404(Ingredient,
-                                                   pk=ingredient_id)
-                (
-                    recipe_ingredient, created
-                ) = RecipeIngredient.objects.get_or_create(
-                    recipe=instance,
-                    ingredient=ingredient_obj,
-                    defaults={'amount': ingredient_data['amount']}
-                )
+                ingredient_obj = ingredient_objs.get(ingredient_id)
+                if ingredient_obj:
+                    recipe_ingredient, created = RecipeIngredient.objects.get_or_create(
+                        recipe=instance,
+                        ingredient=ingredient_obj,
+                        defaults={'amount': ingredient_data['amount']}
+                    )
 
-                if not created:
-                    recipe_ingredient.amount = ingredient_data['amount']
-                    recipe_ingredient.save()
+                    if not created:
+                        recipe_ingredient.amount = ingredient_data['amount']
+                        recipe_ingredient.save()
 
         return super().update(request, *args, **kwargs)
 
