@@ -96,7 +96,9 @@ class RecipeViewSet(ModelViewSet):
                 ingredient_id = ingredient_data['id']
                 ingredient_obj = ingredient_objs.get(ingredient_id)
                 if ingredient_obj:
-                    recipe_ingredient, created = RecipeIngredient.objects.get_or_create(
+                    (
+                        recipe_ingredient, created
+                    ) = RecipeIngredient.objects.get_or_create(
                         recipe=instance,
                         ingredient=ingredient_obj,
                         defaults={'amount': ingredient_data['amount']}
