@@ -2,6 +2,7 @@ from django.core.validators import (MaxLengthValidator, MinLengthValidator,
                                     MinValueValidator, RegexValidator,
                                     MaxValueValidator)
 from django.db import models
+from colorfield.fields import ColorField
 
 from users.models import CustomUser
 
@@ -12,19 +13,7 @@ class Tag(models.Model):
         validators=[MinLengthValidator(1), MaxLengthValidator(200)],
         verbose_name='Имя тега'
     )
-    color = models.CharField(
-        max_length=7,
-        blank=True,
-        null=True,
-        validators=[
-            RegexValidator(
-                regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$',
-                message='Enter a valid color in HEX format.',
-                code='invalid_color_format',
-            )
-        ],
-        verbose_name='Цвет'
-    )
+    color = ColorField(format="hexa", default='#FF0000')
     slug = models.SlugField(
         max_length=200,
         unique=True,
