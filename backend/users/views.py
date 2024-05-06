@@ -11,11 +11,11 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 
 from .models import CustomUser, Subscribe
-from api.pagination import CustomPagination
 from .serializers import (
     CustomUserSerializer,
     SubscriptionSerializer
 )
+from api.pagination import CustomPagination
 
 
 class CustomUserViewSet(UserViewSet):
