@@ -37,9 +37,6 @@ class CustomUser(AbstractUser):
         max_length=254,
         unique=True,
     )
-    is_subscribed = models.BooleanField(
-        default=False,
-    )
 
     def __str__(self):
         return self.username
