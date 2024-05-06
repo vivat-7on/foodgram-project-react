@@ -9,7 +9,11 @@
 [![docker](https://img.shields.io/badge/-Docker-464646?style=flat-square&logo=docker)](https://www.docker.com/)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat-square&logo=Yandex.Cloud)](https://cloud.yandex.ru/)
 
+логин: vivat-7on@yandex.ru
 
+пароль: OoOtyg-222222
+
+домен: https://food-gram.zapto.org/r
 
 
 ## О проекте
