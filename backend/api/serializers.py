@@ -121,7 +121,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             ingredient_ids.append(ingredient_id)
 
             try:
-                ingredient = Ingredient.objects.get(pk=ingredient_id)
+                Ingredient.objects.get(pk=ingredient_id)
             except Ingredient.DoesNotExist:
                 raise serializers.ValidationError({
                     'ingredients': (f'Ингредиент с '
@@ -152,7 +152,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             tag_ids.append(tag_id)
 
             try:
-                tag = Tag.objects.get(pk=tag_id)
+                Tag.objects.get(pk=tag_id)
             except Tag.DoesNotExist:
                 raise serializers.ValidationError({
                     'tags': f'Тег с id={tag_id} не существует!'
