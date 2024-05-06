@@ -87,8 +87,6 @@ class RecipeViewSet(ModelViewSet):
         if not (ingredients and tags):
             raise ParseError("Ingredient and tags are required.")
 
-        instance.tags.set(tags)
-
         if ingredients:
             ingredient_ids = [ingredient['id'] for ingredient in ingredients]
             ingredient_objs = Ingredient.objects.in_bulk(ingredient_ids)
@@ -107,6 +105,9 @@ class RecipeViewSet(ModelViewSet):
                     if not created:
                         recipe_ingredient.amount = ingredient_data['amount']
                         recipe_ingredient.save()
+
+        instance.tags.clear()
+        instance.tags.set(tags)
 
         return super().update(request, *args, **kwargs)
 
@@ -181,7 +182,7 @@ class DownloadShoppingCartView(APIView):
                         ingredient_str = str(ingredient)
                     except Exception as e:
                         ingredient_str = f'Error {e}'
-                        amount = recipe.amount
+                    amount = recipe.amount
                     measurement_unit = recipe.ingredient.measurement_unit
                     if ingredient_str in ing_am_un:
                         ing_am_un[ingredient_str] = (
