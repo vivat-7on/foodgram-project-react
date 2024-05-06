@@ -12,7 +12,10 @@ from rest_framework.status import HTTP_204_NO_CONTENT
 
 from .models import CustomUser, Subscribe
 from api.pagination import CustomPagination
-from .serializers import CustomUserSerializer, SubscriptionSerializer
+from .serializers import (
+    CustomUserSerializer,
+    SubscriptionSerializer
+)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -38,26 +41,28 @@ class CustomUserViewSet(UserViewSet):
             subscriber=self.request.user
         )
         if not subscribe_queryset:
-            raise NotFound
+            raise NotFound('У вас нет ни одной подписки(')
+        users = []
         for sub in subscribe_queryset:
             subscribed_to_id = sub.subscribed_to.id
-            users = CustomUser.objects.filter(pk=subscribed_to_id)
-            paginator = PageNumberPagination()
-            paginator.page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
-            result_page = paginator.paginate_queryset(users, request)
-            recipes_limit = request.query_params.get('recipes_limit')
-            serializer = SubscriptionSerializer(
-                result_page,
-                many=True,
-                context={'recipes_limit': recipes_limit}
-            )
-            return paginator.get_paginated_response(serializer.data)
+            users.extend(CustomUser.objects.filter(pk=subscribed_to_id))
+        paginator = PageNumberPagination()
+        paginator.page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
+        result_page = paginator.paginate_queryset(users, request)
+        recipes_limit = request.query_params.get('recipes_limit')
+        serializer = SubscriptionSerializer(
+            result_page,
+            many=True,
+            context={'recipes_limit': recipes_limit,
+                     'request': request}
+        )
+        return paginator.get_paginated_response(serializer.data)
 
     @action(detail=True, permission_classes=[IsAuthenticated])
     def subscriptions_detail(self, request, id=None):
         subscriber = self.request.user
         if subscriber.id == id:
-            raise ParseError
+            raise ParseError('Вы не можете подписаться на себя')
         try:
             subscribed_to = CustomUser.objects.get(pk=id)
             with transaction.atomic():
@@ -66,15 +71,14 @@ class CustomUserViewSet(UserViewSet):
                     subscribed_to=subscribed_to
                 )
         except CustomUser.DoesNotExist:
-            raise NotFound
+            raise NotFound('Пользователя с таким id не существует')
         except IntegrityError:
-            raise ParseError
-        subscribed_to.is_subscribed = True
-        subscribed_to.save()
+            raise ParseError('Подписка уже существует')
         recipes_limit = request.query_params.get('recipes_limit')
         serializer = SubscriptionSerializer(
             subscribed_to,
-            context={'recipes_limit': recipes_limit}
+            context={'recipes_limit': recipes_limit,
+                     'request': request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -91,8 +95,6 @@ class CustomUserViewSet(UserViewSet):
                 if not subscribe.exists():
                     raise ParseError("Subscription does not exist")
                 subscribe.delete()
-                subscribed_to.is_subscribed = False
-                subscribed_to.save()
         except CustomUser.DoesNotExist:
             raise NotFound
         return Response(status=HTTP_204_NO_CONTENT)

@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from recipes.models import Recipe
-from .models import CustomUser
+from .models import CustomUser, Subscribe
 
 
 class Base64ImageField(serializers.ImageField):
@@ -33,6 +33,8 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
     class Meta(UserSerializer.Meta):
         model = CustomUser
         fields = [
@@ -43,6 +45,19 @@ class CustomUserSerializer(UserSerializer):
             'last_name',
             'is_subscribed'
         ]
+
+    def get_is_subscribed(self, obj):
+        if self.context['request'].user.is_authenticated:
+            if self.context['request'].path == '/users/me':
+                return False
+            else:
+                subscribed = Subscribe.objects.filter(
+                    subscriber=self.context['request'].user,
+                    subscribed_to=obj
+                )
+                return subscribed.exists()
+        else:
+            return False
 
 
 class RecipeSubscribeSerializer(ModelSerializer):
@@ -64,6 +79,7 @@ class RecipeSubscribeSerializer(ModelSerializer):
 class SubscriptionSerializer(ModelSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
@@ -81,7 +97,7 @@ class SubscriptionSerializer(ModelSerializer):
 
     def get_recipes(self, obj):
         queryset = Recipe.objects.filter(author=obj.id)
-        recipes_limit = self.context.get('recipes_limit', 0)
+        recipes_limit = self.context.get('recipes_limit', None)
         if recipes_limit is not None:
             return RecipeSubscribeSerializer(
                 queryset[:int(recipes_limit)],
@@ -91,3 +107,12 @@ class SubscriptionSerializer(ModelSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.id).count()
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request', None)
+        if request is not None:
+            return Subscribe.objects.filter(
+                subscriber=request.user,
+                subscribed_to=obj.id
+            ).exists()
+        return False
