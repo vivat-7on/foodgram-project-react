@@ -101,7 +101,7 @@ class RecipeIngredient(models.Model):
         verbose_name='Игредиент',
         related_name='recipe_ingredients'
     )
-    amount = models.IntegerField(verbose_name='Amount')
+    amount = models.IntegerField(verbose_name='Количество')
 
     class Meta:
         verbose_name = 'Игредиент для рецепта'
