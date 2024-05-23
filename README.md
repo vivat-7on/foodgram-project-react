@@ -9,16 +9,15 @@
 [![docker](https://img.shields.io/badge/-Docker-464646?style=flat-square&logo=docker)](https://www.docker.com/)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat-square&logo=Yandex.Cloud)](https://cloud.yandex.ru/)
 
-логин: vivat-7on@yandex.ru
-
-пароль: OoOtyg-222222
-
-домен: https://food-gram.zapto.org/r
-
 
 ## О проекте
 
 Foodgram - это веб-приложение, разработанное для обмена рецептами. Пользователи могут создавать аккаунты, подписываться на других авторов, добавлять рецепты в избранное и список покупок, а также загружать список покупок для рецептов.
+
+Для реализации проекта была спроектированна следующая база данных:
+
+<img width="880" alt="Снимок экрана 2024-05-23 в 18 10 42" src="https://github.com/vivat-7on/foodgram-project-react/assets/124658891/a2749478-aeec-4a34-bd80-733e6c6a9c94">
+
 
 ## Установка и запуск
 
